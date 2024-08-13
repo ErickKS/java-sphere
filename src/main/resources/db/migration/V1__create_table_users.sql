@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS TB_SPHERE_USER (
+  id BIGINT AUTO_INCREMENT,
+  name VARCHAR(255),
+  bio VARCHAR(255),
+  email VARCHAR(255),
+  password VARCHAR(255),
+  created_at DATETIME,
+  updated_at DATETIME,
+
+  PRIMARY KEY (id)
+)
