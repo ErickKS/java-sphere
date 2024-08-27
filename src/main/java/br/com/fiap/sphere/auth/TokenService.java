@@ -3,17 +3,25 @@ package br.com.fiap.sphere.auth;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import br.com.fiap.sphere.user.User;
+import br.com.fiap.sphere.user.UserRepository;
+
 @Service
 public class TokenService {
 
-  public Token create(Credentials credentials) {
-    Algorithm algorithm = Algorithm.HMAC256("assinatura");
+  @Autowired
+  UserRepository userRepository;
 
+  Algorithm algorithm = Algorithm.HMAC256("assinatura");
+
+  public Token create(Credentials credentials) {
     var expiresAt = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.ofHours(-3));
 
     var token = JWT.create()
@@ -23,6 +31,16 @@ public class TokenService {
         .sign(algorithm);
 
     return new Token(token, credentials.email());
+  }
+
+  public User getUserFromToken(String token) {
+    var email = JWT.require(algorithm)
+        .build()
+        .verify(token)
+        .getSubject();
+
+    return userRepository.findByEmail(email).orElseThrow(
+        () -> new UsernameNotFoundException("User not found"));
   }
 
 }
