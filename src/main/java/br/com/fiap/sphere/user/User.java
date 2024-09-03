@@ -27,6 +27,7 @@ public class User {
   String bio;
   String email;
   String password;
+  String avatar;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
 }

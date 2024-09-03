@@ -17,7 +17,7 @@ public class SecurityConfig {
     http.authorizeHttpRequests(auth -> auth
         .requestMatchers(HttpMethod.POST, "/login").permitAll()
         .requestMatchers(HttpMethod.POST, "/users").permitAll()
-        .requestMatchers(HttpMethod.GET, "/posts").authenticated());
+        .anyRequest().authenticated());
 
     http.csrf(csrf -> csrf.disable());
     http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
