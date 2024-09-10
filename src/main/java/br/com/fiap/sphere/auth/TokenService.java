@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,12 @@ public class TokenService {
   @Autowired
   UserRepository userRepository;
 
-  Algorithm algorithm = Algorithm.HMAC256("assinatura");
+  private Algorithm algorithm;
+
+  public TokenService(UserRepository userRepository, @Value("${jwt.secret}") String secret) {
+    this.userRepository = userRepository;
+    this.algorithm = Algorithm.HMAC256("assinatura");
+  }
 
   public Token create(Credentials credentials) {
     var expiresAt = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.ofHours(-3));

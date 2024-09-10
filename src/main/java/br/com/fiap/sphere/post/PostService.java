@@ -15,4 +15,8 @@ public class PostService {
     return repository.findAll(pageable);
   }
 
+  public Post create(Post post) {
+    return repository.save(post);
+  }
+
 }

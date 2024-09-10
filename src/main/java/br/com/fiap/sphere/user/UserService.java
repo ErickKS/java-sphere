@@ -3,13 +3,19 @@ package br.com.fiap.sphere.user;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.fiap.sphere.user.dto.UserProfileResponse;
 
@@ -22,12 +28,13 @@ public class UserService {
   @Autowired
   PasswordEncoder passwordEncoder;
 
-  public List<User> findAll() {
-    return repository.findAll();
+  public List<User> findByName(String name) {
+    return repository.findByNameContainingIgnoreCase(name);
   }
 
   public User create(User user) {
     user.setPassword(passwordEncoder.encode(user.getPassword()));
+    user.setAvatar("https://avatar.iran.liara.run/username?username=" + user.getName());
 
     return repository.save(user);
   }
@@ -53,12 +60,23 @@ public class UserService {
       Files.copy(in, destinationFile);
 
       var user = repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-      var avatarPath = "http://localhost:8082/avatars/" + destinationFile.getFileName();
+      var baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+      var avatarPath = baseUrl + "/users/avatars/" + destinationFile.getFileName();
       user.setAvatar(avatarPath);
       repository.save(user);
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public ResponseEntity<Resource> getAvatar(String filename) {
+    Path path = Paths.get("src/main/resources/static/avatars/" + filename);
+    Resource file = UrlResource.from(path.toUri());
+
+    return ResponseEntity
+        .ok()
+        .contentType((MediaType.IMAGE_JPEG))
+        .body(file);
   }
 
 }
